@@ -42,15 +42,18 @@ def main():
             st.error("File does not contain 'text' column. Please upload a valid dataset.")
             return
 
+        # Slider to select number of songs to analyze
+        num_songs = st.slider("Select number of songs to analyze", min_value=1, max_value=len(df), value=10)
+
         # Extract the first line of lyrics
         df['first_line'] = df['cleaned_lyrics'].apply(extract_first_line)
 
-        # Perform sentiment analysis on the first line of lyrics
+        # Perform sentiment analysis on the first lines of lyrics
         df['sentiment'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[0])
         df['subjectivity'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[1])
 
         # Display results
-        st.write(df[['artist', 'song', 'sentiment', 'subjectivity']].head(10))
+        st.write(df[['artist', 'song', 'sentiment', 'subjectivity']].head(num_songs))
 
 if __name__ == '__main__':
     main()
