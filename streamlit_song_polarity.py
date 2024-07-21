@@ -1,19 +1,3 @@
-import streamlit as st
-import pandas as pd
-from textblob import TextBlob
-import io
-
-# Function to clean lyrics
-def clean_lyrics(text):
-    return text.replace("\n", "")
-
-# Function to perform sentiment analysis
-def analyze_sentiment(lyric):
-    tb = TextBlob(lyric)
-    sentiment = tb.sentiment.polarity
-    subjectivity = tb.sentiment.subjectivity
-    return sentiment, subjectivity
-
 # Streamlit app
 def main():
     st.title('Lyrics Sentiment Analysis')
@@ -63,6 +47,9 @@ def main():
             subjectivities.append(subjectivity)
 
         # Add sentiment scores to dataframe
+        st.write(f"Length of sentiments list: {len(sentiments)}")
+        st.write(f"Length of subjectivities list: {len(subjectivities)}")
+        
         df['sentiment_score'] = sentiments
         df['subjectivity'] = subjectivities
 
