@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from textblob import TextBlob
+import time
 
 # Function to clean lyrics
 def clean_lyrics(text):
@@ -42,19 +43,21 @@ def main():
             st.error("File does not contain 'text' column. Please upload a valid dataset.")
             return
 
-        # Slider to select number of songs to analyze
-        num_songs = st.slider("Select number of songs to analyze", min_value=1, max_value=len(df), value=10)
+        # User input for number of songs to analyze
+        num_songs = st.number_input("Enter number of songs to analyze", min_value=1, max_value=len(df), value=10)
 
-        # Extract the first line of lyrics
-        df['first_line'] = df['cleaned_lyrics'].apply(extract_first_line)
+        if st.button('Analyze Sentiment'):
+            with st.spinner('Analyzing...'):
+                # Extract the first line of lyrics
+                df['first_line'] = df['cleaned_lyrics'].apply(extract_first_line)
 
-        # Perform sentiment analysis on the first lines of lyrics
-        df['sentiment'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[0])
-        df['subjectivity'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[1])
+                # Perform sentiment analysis on the first lines of lyrics
+                df['sentiment'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[0])
+                df['subjectivity'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[1])
 
-        # Display results using st.table
-        st.subheader("Sentiment Analysis Results")
-        st.table(df[['artist', 'song', 'sentiment', 'subjectivity']].head(num_songs))
+                # Display results using st.table
+                st.subheader("Sentiment Analysis Results")
+                st.table(df[['artist', 'song', 'sentiment', 'subjectivity']].head(num_songs))
 
 if __name__ == '__main__':
     main()
