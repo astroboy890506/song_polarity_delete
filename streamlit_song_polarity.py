@@ -66,11 +66,15 @@ def main():
         st.write(f"Length of sentiments list: {len(sentiments)}")
         st.write(f"Length of subjectivities list: {len(subjectivities)}")
         
-        df['sentiment_score'] = sentiments
-        df['subjectivity'] = subjectivities
+        if len(sentiments) == rows_to_analyze and len(subjectivities) == rows_to_analyze:
+            df['sentiment_score'] = sentiments
+            df['subjectivity'] = subjectivities
+        else:
+            st.error("Lengths of sentiment and subjectivity lists do not match number of rows analyzed.")
 
         # Display results
         st.write(df[['No', 'Song', 'Artist', 'sentiment_score', 'subjectivity']].head(rows_to_analyze))
 
 if __name__ == '__main__':
     main()
+
