@@ -1,11 +1,14 @@
 import streamlit as st
 import pandas as pd
 from textblob import TextBlob
-import io
 
 # Function to clean lyrics
 def clean_lyrics(text):
     return text.replace("\n", "")
+
+# Function to extract the first line of lyrics
+def extract_first_line(text):
+    return text.split("\n")[0]
 
 # Function to perform sentiment analysis
 def analyze_sentiment(lyric):
@@ -17,26 +20,15 @@ def analyze_sentiment(lyric):
 # Streamlit app
 def main():
     st.title('Lyrics Sentiment Analysis')
-    st.write('Upload a file with lyrics for sentiment analysis.')
-    st.write('Supported file formats: Excel (xlsx, xls) and CSV (csv)')
+    st.write('Upload a CSV file with lyrics for sentiment analysis.')
 
     # File upload
-    uploaded_file = st.file_uploader("Upload a file", type=['xlsx', 'xls', 'csv'])
+    uploaded_file = st.file_uploader("Upload a CSV file", type=['csv'])
 
     if uploaded_file is not None:
-        # Determine file type
-        file_ext = uploaded_file.name.split('.')[-1]
-        
+        # Load data from uploaded file
         try:
-            if file_ext in ['xlsx', 'xls']:
-                # Load Excel file
-                df = pd.read_excel(uploaded_file)
-            elif file_ext == 'csv':
-                # Load CSV file
-                df = pd.read_csv(uploaded_file)
-            else:
-                st.error("Unsupported file format. Please upload an Excel (xlsx, xls) or CSV (csv) file.")
-                return
+            df = pd.read_csv(uploaded_file)
         except Exception as e:
             st.error(f"Error: {e}")
             return
@@ -50,31 +42,15 @@ def main():
             st.error("File does not contain 'text' column. Please upload a valid dataset.")
             return
 
-        # Select number of rows to analyze
-        rows_to_analyze = st.number_input("Select number of rows to analyze", min_value=1, max_value=len(df), value=10)
+        # Extract the first line of lyrics
+        df['first_line'] = df['cleaned_lyrics'].apply(extract_first_line)
 
-        # Perform sentiment analysis
-        sentiments = []
-        subjectivities = []
-        for i in range(rows_to_analyze):
-            lyric = df.loc[i, 'cleaned_lyrics']
-            sentiment, subjectivity = analyze_sentiment(lyric)
-            sentiments.append(sentiment)
-            subjectivities.append(subjectivity)
-
-        # Add sentiment scores to dataframe
-        st.write(f"Length of sentiments list: {len(sentiments)}")
-        st.write(f"Length of subjectivities list: {len(subjectivities)}")
-        
-        if len(sentiments) == rows_to_analyze and len(subjectivities) == rows_to_analyze:
-            df['sentiment_score'] = sentiments
-            df['subjectivity'] = subjectivities
-        else:
-            st.error("Lengths of sentiment and subjectivity lists do not match number of rows analyzed.")
+        # Perform sentiment analysis on the first line of lyrics
+        df['sentiment'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[0])
+        df['subjectivity'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[1])
 
         # Display results
-        st.write(df[['No', 'Song', 'Artist', 'sentiment_score', 'subjectivity']].head(rows_to_analyze))
+        st.write(df[['artist', 'song', 'sentiment', 'subjectivity']].head(10))
 
 if __name__ == '__main__':
     main()
-
