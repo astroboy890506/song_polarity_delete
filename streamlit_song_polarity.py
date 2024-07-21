@@ -52,8 +52,9 @@ def main():
         df['sentiment'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[0])
         df['subjectivity'] = df['first_line'].apply(lambda x: analyze_sentiment(x)[1])
 
-        # Display results
-        st.write(df[['artist', 'song', 'sentiment', 'subjectivity']].head(num_songs))
+        # Display results using st.table
+        st.subheader("Sentiment Analysis Results")
+        st.table(df[['artist', 'song', 'sentiment', 'subjectivity']].head(num_songs))
 
 if __name__ == '__main__':
     main()
