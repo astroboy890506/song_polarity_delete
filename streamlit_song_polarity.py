@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from textblob import TextBlob
+import io
 
 # Function to clean lyrics
 def clean_lyrics(text):
@@ -16,15 +17,26 @@ def analyze_sentiment(lyric):
 # Streamlit app
 def main():
     st.title('Lyrics Sentiment Analysis')
-    st.write('Upload an Excel file with a "text" column containing song lyrics.')
+    st.write('Upload a file with lyrics for sentiment analysis.')
+    st.write('Supported file formats: Excel (xlsx, xls) and CSV (csv)')
 
     # File upload
-    uploaded_file = st.file_uploader("Upload an Excel file", type=['xlsx', 'xls'])
+    uploaded_file = st.file_uploader("Upload a file", type=['xlsx', 'xls', 'csv'])
 
     if uploaded_file is not None:
-        # Load data from uploaded file
+        # Determine file type
+        file_ext = uploaded_file.name.split('.')[-1]
+        
         try:
-            df = pd.read_excel(uploaded_file)
+            if file_ext in ['xlsx', 'xls']:
+                # Load Excel file
+                df = pd.read_excel(uploaded_file)
+            elif file_ext == 'csv':
+                # Load CSV file
+                df = pd.read_csv(uploaded_file)
+            else:
+                st.error("Unsupported file format. Please upload an Excel (xlsx, xls) or CSV (csv) file.")
+                return
         except Exception as e:
             st.error(f"Error: {e}")
             return
@@ -32,7 +44,11 @@ def main():
         st.write(f"Number of rows in the dataset: {len(df)}")
 
         # Clean lyrics column
-        df['cleaned_lyrics'] = df['text'].apply(clean_lyrics)
+        if 'text' in df.columns:  # Check if 'text' column exists
+            df['cleaned_lyrics'] = df['text'].apply(clean_lyrics)
+        else:
+            st.error("File does not contain 'text' column. Please upload a valid dataset.")
+            return
 
         # Select number of rows to analyze
         rows_to_analyze = st.number_input("Select number of rows to analyze", min_value=1, max_value=len(df), value=10)
