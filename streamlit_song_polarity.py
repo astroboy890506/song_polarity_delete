@@ -62,7 +62,6 @@
 # if __name__ == '__main__':
 #     main()
 
-#======================================================
 # Import required libraries
 import streamlit as st
 import pandas as pd
@@ -75,14 +74,8 @@ nltk.download('stopwords')
 
 # Preprocessing Function
 def preprocess_text(text_series):
-    """
-    Preprocess a pandas Series of text data:
-    - Remove newline characters.
-    - Convert to lowercase.
-    - Remove stopwords.
-    """
+
     stop_words = set(stopwords.words('english'))  # Load English stopwords
-    
     def clean_text(text):
         text = text.replace("\n", " ").lower()  # Clean newlines and lowercase
         words = text.split()  # Tokenize words
@@ -93,10 +86,6 @@ def preprocess_text(text_series):
 
 # Sentiment Analysis Function
 def analyze_sentiment(lyrics):
-    """
-    Perform sentiment analysis on lyrics using TextBlob.
-    Returns polarity and subjectivity.
-    """
     tb = TextBlob(lyrics)
     return tb.sentiment.polarity, tb.sentiment.subjectivity
 
